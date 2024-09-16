@@ -353,6 +353,8 @@ public class PnQuanLyNhanVienGUI extends JPanel {
         }
         loadDataTblNhanVien(null);
         loadDataCmbQuyen();
+        turnOffButtonSuaQuyen();
+        turnOffButtonXoaQuyen();
     }
 
     JComboBox<String> cmbQuyen;
@@ -553,11 +555,15 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             new Dialog("Chưa chọn nhóm quyền để xoá!", Dialog.ERROR_DIALOG);
             return;
         }
+        String tenQuyen = cmbQuyen.getSelectedItem() + "";
+        if (phanQuyenBUS.kiemTraMaQuyenCoTaiKhoanNaoKhong(tenQuyen)) {
+            new Dialog("Có tài khoản mang quyền này!", Dialog.ERROR_DIALOG);
+            return;
+        }
         Dialog dlg = new Dialog("Bạn có chắc chắn muốn xoá?", Dialog.WARNING_DIALOG);
         if (dlg.getAction() == Dialog.CANCEL_OPTION) {
             return;
         }
-        String tenQuyen = cmbQuyen.getSelectedItem() + "";
         boolean flag = phanQuyenBUS.xoaQuyen(tenQuyen);
         if (flag) {
             loadDataCmbQuyen();
@@ -594,16 +600,34 @@ public class PnQuanLyNhanVienGUI extends JPanel {
     private void xuLyHienThiChiTietQuyen() {
         ArrayList<PhanQuyen> dsq = phanQuyenBUS.getListQuyen();
         PhanQuyen phanQuyen = new PhanQuyen();
+        boolean found = false;
         for (PhanQuyen pq : dsq) {
             if (pq.getQuyen().equals(cmbQuyen.getSelectedItem())) {
+                found = true;
                 phanQuyen.setQuyen(pq.getQuyen());
                 phanQuyen.setNhapHang(pq.getNhapHang());
                 phanQuyen.setQlSanPham(pq.getQlSanPham());
                 phanQuyen.setQlNhanVien(pq.getQlNhanVien());
                 phanQuyen.setQlKhachHang(pq.getQlKhachHang());
                 phanQuyen.setThongKe(pq.getThongKe());
+                turnOffButtonThemQuyen();
+                if (checkQuyenAdmin(phanQuyen)) {
+                    turnOffButtonSuaQuyen();
+                    turnOffButtonXoaQuyen();
+                } else if (checkQuyenQuanLy(phanQuyen)) {
+                    turnOffButtonXoaQuyen();
+                    turnOnButtonSuaQuyen();
+                } else {
+                    turnOnButtonXoaQuyen();
+                    turnOnButtonSuaQuyen();
+                }
                 break;
             }
+        }
+        if (found == false) {
+            turnOnButtonThemQuyen();
+            turnOffButtonXoaQuyen();
+            turnOffButtonSuaQuyen();
         }
         ckbNhapHang.setSelected(false);
         ckbQLSanPham.setSelected(false);
@@ -625,6 +649,20 @@ public class PnQuanLyNhanVienGUI extends JPanel {
         if (phanQuyen.getThongKe() == 1) {
             ckbThongKe.setSelected(true);
         }
+    }
+
+    private Boolean checkQuyenAdmin(PhanQuyen phanQuyen) {
+        if (phanQuyen.getQuyen().equals("Quản trị")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkQuyenQuanLy(PhanQuyen phanQuyen) {
+        if (phanQuyen.getQuyen().equals("Quản lý")) {
+            return true;
+        }
+        return false;
     }
 
     private void loadDataCmbQuyen() {
@@ -763,6 +801,8 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             }
             turnOffButtonThemNhanVien();
             turnOnButtonSuaNhanVien();
+            turnOffTxtNgaySinhNV();
+            turnOffTxtTenNV();
         }
     }
 
@@ -803,6 +843,8 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             turnOnButtonThemNhanVien();
             turnOffButtonSuaNhanVien();
             turnOffButtonXoaNhanVien();
+            turnOnTxtNgaySinhNV();
+            turnOnTxtTenNV();
         }
     }
 
@@ -812,6 +854,22 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             return true;
         }
         return false;
+    }
+
+    private void turnOnTxtTenNV() {
+        txtTen.setEditable(true);
+    }
+
+    private void turnOffTxtTenNV() {
+        txtTen.setEditable(false);
+    }
+
+    private void turnOnTxtNgaySinhNV() {
+        txtNgaySinh.setEditable(true);
+    }
+
+    private void turnOffTxtNgaySinhNV() {
+        txtNgaySinh.setEditable(false);
     }
 
     private void turnOnButtonCapTaiKhoan() {
@@ -852,6 +910,30 @@ public class PnQuanLyNhanVienGUI extends JPanel {
 
     private void turnOffButtonKhoaTaiKhoan() {
         btnXoaTaiKhoan.setEnabled(false);
+    }
+
+    private void turnOnButtonXoaQuyen() {
+        btnXoaQuyen.setEnabled(true);
+    }
+
+    private void turnOffButtonXoaQuyen() {
+        btnXoaQuyen.setEnabled(false);
+    }
+
+    private void turnOnButtonSuaQuyen() {
+        btnSuaQuyen.setEnabled(true);
+    }
+
+    private void turnOffButtonSuaQuyen() {
+        btnSuaQuyen.setEnabled(false);
+    }
+
+    private void turnOnButtonThemQuyen() {
+        btnThemQuyen.setEnabled(true);
+    }
+
+    private void turnOffButtonThemQuyen() {
+        btnThemQuyen.setEnabled(false);
     }
 
     TaiKhoanBUS taiKhoanBUS = TaiKhoanBUS.getInstance();

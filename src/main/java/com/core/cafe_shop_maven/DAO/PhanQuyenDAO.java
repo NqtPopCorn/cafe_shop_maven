@@ -178,7 +178,6 @@ public class PhanQuyenDAO {
                 ctq += "ThongKe ";
 
             pre.setString(2, ctq);
-
             return pre.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -198,4 +197,21 @@ public class PhanQuyenDAO {
         }
         return false;
     }
+
+    public boolean kiemTraMaQuyenCoTaiKhoanNaoKhong(int maQuyen) {
+        try {
+            String sql = "SELECT COUNT(*) > 0 FROM quyentaikhoan WHERE MaQuyen = ?";
+            PreparedStatement pre = MyConnect.conn.prepareStatement(sql);
+            pre.setInt(1, maQuyen);
+
+            ResultSet rs = pre.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
