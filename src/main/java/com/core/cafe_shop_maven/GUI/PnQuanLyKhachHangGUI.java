@@ -84,6 +84,7 @@ public class PnQuanLyKhachHangGUI extends JPanel {
         txtMa = new JTextField(20);
         txtMa.setEditable(false);
         txtTen = new JTextField(20);
+        txtTen.setEditable(false);
         txtDiaChi = new JTextField(20);
         txtSDT = new JTextField(20);
 

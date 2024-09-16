@@ -1025,6 +1025,13 @@ public class PnQuanLyNhapHangGUI extends javax.swing.JPanel {
     }// GEN-LAST:event_btnXoaKhoiGioActionPerformed
 
     private void tblKhoMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_tblKhoMouseClicked
+        int row = tblKho.getSelectedRow();
+        if (row > -1) {
+            String maSP = tblKho.getValueAt(row, 0) + "";
+            String tenSP = tblKho.getValueAt(row, 1) + "";
+            jTextField2.setText(maSP);
+            jTextField3.setText(tenSP);
+        }
         txtDonGia.setText("1");
         txtSoLuong.setText("1");
         tblGioNhap.clearSelection();

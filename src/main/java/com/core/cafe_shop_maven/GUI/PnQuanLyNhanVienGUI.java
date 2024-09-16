@@ -1,5 +1,6 @@
 package com.core.cafe_shop_maven.GUI;
 
+import com.core.cafe_shop_maven.BUS.DangNhapBUS;
 import com.core.cafe_shop_maven.CustomFunctions.XuLyFileExcel;
 import com.core.cafe_shop_maven.CustomFunctions.Dialog;
 import com.core.cafe_shop_maven.CustomFunctions.TransparentPanel;
@@ -347,6 +348,9 @@ public class PnQuanLyNhanVienGUI extends JPanel {
         pnCardTabNhanVien.add(pnPhanQuyen, "2");
         this.add(pnCardTabNhanVien);
 
+        if (!checkAdmin()) {
+            lblTabbedQuyen.setVisible(false);
+        }
         loadDataTblNhanVien(null);
         loadDataCmbQuyen();
     }
@@ -749,8 +753,16 @@ public class PnQuanLyNhanVienGUI extends JPanel {
                 txtNgaySinh.setText(sdf.format(d));
             }
             txtSDT.setText(tblNhanVien.getValueAt(row, 4) + "");
-
             txtDiaChi.setText(tblNhanVien.getValueAt(row, 3) + "");
+            if (tblNhanVien.getValueAt(row, 5).equals("Khả dụng")) {
+                turnOffButtonCapTaiKhoan();
+                turnOnButtonKhoaTaiKhoan();
+            } else {
+                turnOnButtonCapTaiKhoan();
+                turnOffButtonKhoaTaiKhoan();
+            }
+            turnOffButtonThemNhanVien();
+            turnOnButtonSuaNhanVien();
         }
     }
 
@@ -787,7 +799,59 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             }
 
             dtmNhanVien.addRow(vec);
+            turnOnButtonCapTaiKhoan();
+            turnOnButtonThemNhanVien();
+            turnOffButtonSuaNhanVien();
+            turnOffButtonXoaNhanVien();
         }
+    }
+
+    private Boolean checkAdmin() {
+        int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+        if (maTK == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    private void turnOnButtonCapTaiKhoan() {
+        btnCapTaiKhoan.setEnabled(true);
+    }
+
+    private void turnOffButtonCapTaiKhoan() {
+        btnCapTaiKhoan.setEnabled(false);
+    }
+
+    private void turnOnButtonThemNhanVien() {
+        btnThemNV.setEnabled(true);
+    }
+
+    private void turnOffButtonThemNhanVien() {
+        btnThemNV.setEnabled(false);
+    }
+
+    private void turnOnButtonSuaNhanVien() {
+        btnSuaNV.setEnabled(true);
+    }
+
+    private void turnOffButtonSuaNhanVien() {
+        btnSuaNV.setEnabled(false);
+    }
+
+    private void turnOnButtonXoaNhanVien() {
+        btnXoaNV.setEnabled(true);
+    }
+
+    private void turnOffButtonXoaNhanVien() {
+        btnXoaNV.setEnabled(false);
+    }
+
+    private void turnOnButtonKhoaTaiKhoan() {
+        btnXoaTaiKhoan.setEnabled(true);
+    }
+
+    private void turnOffButtonKhoaTaiKhoan() {
+        btnXoaTaiKhoan.setEnabled(false);
     }
 
     TaiKhoanBUS taiKhoanBUS = TaiKhoanBUS.getInstance();

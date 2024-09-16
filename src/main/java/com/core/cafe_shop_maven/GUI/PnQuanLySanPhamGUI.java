@@ -98,7 +98,9 @@ public class PnQuanLySanPhamGUI extends JPanel {
         txtTen = new JTextField(15);
         cmbLoai = new JComboBox<String>();
         txtsoLuong = new JTextField(15);
+        txtsoLuong.setEditable(false);
         txtdonGia = new JTextField(15);
+        txtdonGia.setEditable(false);
 
         JPanel pnMa = new TransparentPanel();
         lblMa.setFont(font);

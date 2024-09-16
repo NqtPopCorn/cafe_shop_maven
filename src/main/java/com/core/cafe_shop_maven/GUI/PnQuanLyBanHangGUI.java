@@ -952,6 +952,9 @@ public class PnQuanLyBanHangGUI extends JPanel {
         }
 
         for (SanPham sp : dssp) {
+            if (sp.getTrangThai() == 0) {
+                continue;
+            }
             Vector vec = new Vector();
             vec.add(sp.getMaSP());
             vec.add(sp.getTenSP());

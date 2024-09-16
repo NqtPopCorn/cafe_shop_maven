@@ -24,6 +24,7 @@ public class DlgCapTaiKhoan extends javax.swing.JDialog {
 
                 txtMaNV.setText(maNV);
                 loadDataCmbQuyen();
+                getTenDangNhap(maNV);
         }
 
         @SuppressWarnings("unchecked")
@@ -202,6 +203,16 @@ public class DlgCapTaiKhoan extends javax.swing.JDialog {
                 for (PhanQuyen pq : dsq) {
                         cmbQuyen.addItem(pq.getQuyen());
                 }
+        }
+
+        private String getTenDangNhap(String maNV) {
+                String tenDangNhap;
+                tenDangNhap = taiKhoanBUS.getTenDangNhapTheoMa(maNV);
+                if (!tenDangNhap.isEmpty()) {
+                        txtTenDangNhap.setText(tenDangNhap);
+                        txtTenDangNhap.setEditable(false);
+                }
+                return tenDangNhap;
         }
 
         // Variables declaration - do not modify//GEN-BEGIN:variables
