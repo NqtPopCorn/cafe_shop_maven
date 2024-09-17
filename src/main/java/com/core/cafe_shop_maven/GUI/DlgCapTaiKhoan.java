@@ -2,6 +2,7 @@ package com.core.cafe_shop_maven.GUI;
 
 import com.core.cafe_shop_maven.BUS.PhanQuyenBUS;
 import com.core.cafe_shop_maven.BUS.TaiKhoanBUS;
+import com.core.cafe_shop_maven.CustomFunctions.Dialog;
 import com.core.cafe_shop_maven.DTO.PhanQuyen;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -187,6 +188,10 @@ public class DlgCapTaiKhoan extends javax.swing.JDialog {
         private PhanQuyenBUS phanQuyenBUS = PhanQuyenBUS.getInstance();
 
         private void btnTaoTaiKhoanActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnTaoTaiKhoanActionPerformed
+                if (checkQuyenQuanLy(cmbQuyen.getSelectedItem() + "")) {
+                        new Dialog("Chỉ quản trị mới được thêm quyền này", Dialog.ERROR_DIALOG);
+                        return;
+                }
                 taiKhoanBUS.themTaiKhoan(txtMaNV.getText(),
                                 txtTenDangNhap.getText(),
                                 (String) cmbQuyen.getSelectedItem());
@@ -213,6 +218,10 @@ public class DlgCapTaiKhoan extends javax.swing.JDialog {
                         txtTenDangNhap.setEditable(false);
                 }
                 return tenDangNhap;
+        }
+
+        private Boolean checkQuyenQuanLy(String tenQuyen) {
+                return tenQuyen.equals("Quản lý");
         }
 
         // Variables declaration - do not modify//GEN-BEGIN:variables

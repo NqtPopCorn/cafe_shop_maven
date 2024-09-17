@@ -31,8 +31,7 @@ public class NhanVienBUS {
     }
 
     public ArrayList<NhanVien> getDanhSachNhanVien() {
-        if (this.listNhanVien == null)
-            docDanhSach();
+        docDanhSach();
         return this.listNhanVien;
     }
 

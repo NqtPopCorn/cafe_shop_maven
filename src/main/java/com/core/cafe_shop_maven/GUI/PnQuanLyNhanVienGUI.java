@@ -11,6 +11,8 @@ import static com.core.cafe_shop_maven.Cafe_shop_maven.changLNF;
 import com.core.cafe_shop_maven.BUS.NhanVienBUS;
 import com.core.cafe_shop_maven.BUS.PhanQuyenBUS;
 import com.core.cafe_shop_maven.BUS.TaiKhoanBUS;
+import com.core.cafe_shop_maven.DAO.NhanVienDAO;
+import com.core.cafe_shop_maven.DAO.PhanQuyenDAO;
 import com.core.cafe_shop_maven.DTO.NhanVien;
 import com.core.cafe_shop_maven.DTO.PhanQuyen;
 
@@ -697,9 +699,36 @@ public class PnQuanLyNhanVienGUI extends JPanel {
 
     private void xuLyKhoaTaiKhoan() {
         TaiKhoanBUS taiKhoanBUS = TaiKhoanBUS.getInstance();
-        taiKhoanBUS.khoaTaiKhoan(txtMaNV.getText());
+        NhanVienDAO nhanVienDAO = NhanVienDAO.getInstance();
+        int maTK = nhanVienDAO.getNhanVien(Integer.parseInt(txtMaNV.getText())).getMaTK();
+        if (checkMyself(maTK)) {
+            new Dialog("Không thể khóa tài khoản bản thân!", Dialog.ERROR_DIALOG);
+            return;
+        }
+        if (checkQuanTri()) {
+            if (checkAdminTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản trị!", Dialog.ERROR_DIALOG);
+                return;
+            }
+            if (checkQuanLyTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản lý!", Dialog.ERROR_DIALOG);
+                return;
+            }
+        } else if (!checkAdmin()) {
+            if (checkAdminTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản trị!", Dialog.ERROR_DIALOG);
+                return;
+            }
+            if (checkQuanLyTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản lý!", Dialog.ERROR_DIALOG);
+                return;
+            }
+        }
+        taiKhoanBUS.khoaTaiKhoan(maTK);
         loadDataTblNhanVien(null);
     }
+
+
 
     private void xuLyNhapExcel() {
         Dialog dlg = new Dialog("Dữ liệu cũ sẽ bị xoá, tiếp tục?", Dialog.WARNING_DIALOG);
@@ -809,6 +838,7 @@ public class PnQuanLyNhanVienGUI extends JPanel {
     private void loadDataTblNhanVien(ArrayList<NhanVien> dsnv) {
         dtmNhanVien.setRowCount(0);
         if (dsnv == null)
+
             dsnv = nhanVienBUS.getDanhSachNhanVien();
 
         for (NhanVien nv : dsnv) {
@@ -850,7 +880,39 @@ public class PnQuanLyNhanVienGUI extends JPanel {
 
     private Boolean checkAdmin() {
         int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
-        if (maTK == 1) {
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        if (tenQuyen.equals("Quản trị")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkQuanTri() {
+        int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        if (tenQuyen.equals("Quản lý")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkMyself(int maTKsub) {
+        int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+        return maTK == maTKsub;
+    }
+
+    private Boolean checkAdminTheoMa(int maTK) {
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        if (tenQuyen.equals("Quản trị")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkQuanLyTheoMa(int maTK) {
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        System.out.println(tenQuyen);
+        if (tenQuyen.equals("Quản lý")) {
             return true;
         }
         return false;

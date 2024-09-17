@@ -1,7 +1,11 @@
 package com.core.cafe_shop_maven.GUI;
 
+import com.core.cafe_shop_maven.BUS.DangNhapBUS;
+import com.core.cafe_shop_maven.BUS.NhanVienBUS;
 import com.core.cafe_shop_maven.BUS.PhanQuyenBUS;
 import com.core.cafe_shop_maven.BUS.TaiKhoanBUS;
+import com.core.cafe_shop_maven.DAO.NhanVienDAO;
+import com.core.cafe_shop_maven.DAO.TaiKhoanDAO;
 import com.core.cafe_shop_maven.DTO.PhanQuyen;
 import com.core.cafe_shop_maven.CustomFunctions.Dialog;
 import java.awt.Image;
@@ -44,17 +48,45 @@ public class DlgQuyen_MatKhau extends javax.swing.JDialog {
                 cmbQuyen.removeAllItems();
                 phanQuyenBUS.docDanhSachQuyen();
                 ArrayList<PhanQuyen> dsq = phanQuyenBUS.getListQuyen();
+                String maTK = NhanVienDAO.getInstance().getNhanVien(Integer.parseInt(maNV)).getMaTK() + "";
+                String quyen = taiKhoanBUS.getQuyenTheoMa(maTK);
                 for (PhanQuyen pq : dsq) {
+                        if (pq.getQuyen().equals("Quản trị") && !quyen.equals("Quản trị")) {
+                                continue;
+                        }
                         cmbQuyen.addItem(pq.getQuyen());
                 }
 
-                String quyen = taiKhoanBUS.getQuyenTheoMa(maNV);
                 for (int i = 0; i < cmbQuyen.getItemCount(); i++) {
                         if (cmbQuyen.getItemAt(i).equals(quyen)) {
                                 cmbQuyen.setSelectedIndex(i);
                                 break;
                         }
                 }
+        }
+
+        private Boolean checkQuyenAdmin(String tenQuyen) {
+                return tenQuyen.equals("Quản trị");
+        }
+
+        private Boolean checkQuyenQuanLy(String tenQuyen) {
+                return tenQuyen.equals("Quản lý");
+        }
+
+        private Boolean checkQuyenQuanLySelect(String maNV) {
+                String tenQuyen = TaiKhoanBUS.getInstance().getQuyenTheoMa(maNV);
+                return tenQuyen.equals("Quản lý");
+        }
+
+        private Boolean checkQuyenQuanTriSelect(String maNV) {
+                String tenQuyen = TaiKhoanBUS.getInstance().getQuyenTheoMa(maNV);
+                return tenQuyen.equals("Quản trị");
+        }
+
+        private Boolean checkQuyenMyself(String maNV) {
+                int maTKLogin = DangNhapBUS.taiKhoanLogin.getMaTK();
+                String maNVLogin = NhanVienDAO.getInstance().getNhanVienTheoMaTK(maTKLogin).getMaNV() + "";
+                return maNVLogin.equals(maNV);
         }
 
         @SuppressWarnings("unchecked")
@@ -284,6 +316,26 @@ public class DlgQuyen_MatKhau extends javax.swing.JDialog {
         }// GEN-LAST:event_btnCapMatKhauActionPerformed
 
         private void btnLuuQuyenActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnLuuQuyenActionPerformed
+                int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+                String tenQuyenLogin = TaiKhoanBUS.getInstance().getQuyenTheoMa(maTK + "");
+                if (checkQuyenMyself(maNV)) {
+                        new Dialog("Không thể sửa quyền bản thân", Dialog.ERROR_DIALOG);
+                        return;
+                }
+                if (!checkQuyenAdmin(tenQuyenLogin)) {
+                        if (checkQuyenQuanLySelect(maNV)) {
+                                new Dialog("Không thể sửa quyền của Quản lý", Dialog.ERROR_DIALOG);
+                                return;
+                        }
+                        if (checkQuyenQuanTriSelect(maNV)) {
+                                new Dialog("Không thể sửa quyền của quản trị", Dialog.ERROR_DIALOG);
+                                return;
+                        }
+                        if (checkQuyenQuanLy(cmbQuyen.getSelectedItem() + "")) {
+                                new Dialog("Chỉ quản trị mới được thêm quyền này", Dialog.ERROR_DIALOG);
+                                return;
+                        }
+                }
                 taiKhoanBUS.datLaiQuyen(maNV, cmbQuyen.getSelectedItem() + "");
         }// GEN-LAST:event_btnLuuQuyenActionPerformed
 
