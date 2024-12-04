@@ -94,7 +94,7 @@ public class TaiKhoanDAO {
 
     public boolean themQuyen(int maTK, int maQuyen) {
         try {
-            String sql = "INSERT FROM quyentaikhoan(MaQuyen, MaTK) "
+            String sql = "INSERT INTO quyentaikhoan(MaQuyen, MaTK) "
                     + "VALUES (?,?)";
             PreparedStatement pre = MyConnect.conn.prepareStatement(sql);
             pre.setInt(1, maQuyen);
@@ -112,11 +112,24 @@ public class TaiKhoanDAO {
             PreparedStatement pre = MyConnect.conn.prepareStatement(sql);
             pre.setInt(1, maQuyen);
             pre.setInt(2, maTK);
+            if (pre.executeUpdate() == 0) {
+                try {
+                    sql = "INSERT INTO quyentaikhoan(MaQuyen, MaTK) "
+                            + "VALUES (?,?)";
+                    pre = MyConnect.conn.prepareStatement(sql);
+                    pre.setInt(1, maQuyen);
+                    pre.setInt(2, maTK);
+                    return pre.executeUpdate() > 0;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             return pre.executeUpdate() > 0;
         } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật quyền tài khoản: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     public String getQuyenTheoMa(int maTK) {

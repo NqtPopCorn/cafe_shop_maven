@@ -91,4 +91,9 @@ public class PhanQuyenBUS {
         }
         return flag;
     }
+    public boolean kiemTraMaQuyenCoTaiKhoanNaoKhong(String tenQuyen) {
+        docDanhSachQuyen();
+        int maQuyen = PhanQuyenDAO.getInstance().getMaQuyen(tenQuyen);
+        return phanQuyenDAO.kiemTraMaQuyenCoTaiKhoanNaoKhong(maQuyen);
+    }
 }

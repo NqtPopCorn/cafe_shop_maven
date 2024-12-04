@@ -31,8 +31,7 @@ public class NhanVienBUS {
     }
 
     public ArrayList<NhanVien> getDanhSachNhanVien() {
-        if (this.listNhanVien == null)
-            docDanhSach();
+        docDanhSach();
         return this.listNhanVien;
     }
 
@@ -60,11 +59,14 @@ public class NhanVienBUS {
             sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             nv.setNgaySinh(sdf.format(d));
         } catch (Exception ex) {
-            d = new Date();
-            sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            nv.setNgaySinh(sdf.format(d));
+            new Dialog("Ngày sinh không đúng định dạng!", Dialog.ERROR_DIALOG);
+            return false;
         }
         nv.setDiaChi(diaChi);
+        if (!kiemTraSoDienThoai(sdt)) {
+            new Dialog("Số điện thoại không đúng định dạng!", Dialog.ERROR_DIALOG);
+            return false;
+        }
         nv.setSdt(sdt);
         boolean flag = nvDAO.themNhanVien(nv);
         if (!flag) {
@@ -73,6 +75,11 @@ public class NhanVienBUS {
             new Dialog("Thêm thành công!", Dialog.SUCCESS_DIALOG);
         }
         return flag;
+    }
+
+    private boolean kiemTraSoDienThoai(String sdt) {
+        String regex = "^0\\d{9}$";
+        return sdt.matches(regex);
     }
 
     public boolean updateNhanVien(String ma, String ten, String ngaySinh, String diaChi, String sdt) {
@@ -90,6 +97,10 @@ public class NhanVienBUS {
         }
         if (sdt.equals("")) {
             new Dialog("Số điện thoại không được để trống!", Dialog.ERROR_DIALOG);
+            return false;
+        }
+        if (!kiemTraSoDienThoai(sdt)) {
+            new Dialog("Số điện thoại không đúng định dạng!", Dialog.ERROR_DIALOG);
             return false;
         }
         NhanVien nv = new NhanVien();

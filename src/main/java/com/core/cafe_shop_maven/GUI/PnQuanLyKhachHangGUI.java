@@ -257,6 +257,8 @@ public class PnQuanLyKhachHangGUI extends JPanel {
         khachHangBUS.docDanhSach();
         ArrayList<KhachHang> dskh = khachHangBUS.getListKhachHang();
         loadDataLenTableKhachHang(dskh);
+        turnOffButtonSua();
+        turnOnButtonThem();
     }
 
     private void loadDataLenTableKhachHang(ArrayList<KhachHang> dskh) {
@@ -279,6 +281,8 @@ public class PnQuanLyKhachHangGUI extends JPanel {
             txtDiaChi.setText(tblKhachHang.getValueAt(row, 2) + "");
             txtSDT.setText(tblKhachHang.getValueAt(row, 3) + "");
         }
+        turnOnButtonSua();
+        turnOffButtonThem();
     }
 
     private void xuLyLiveSearch() {
@@ -299,5 +303,29 @@ public class PnQuanLyKhachHangGUI extends JPanel {
     private void xuLyXoaKhachHang() {
         if (khachHangBUS.xoaKhachHang(txtMa.getText()))
             btnReset.doClick();
+    }
+
+    private void turnOnTxtTen() {
+        txtTen.setEditable(true);
+    }
+
+    private void turnOffTxtTen() {
+        txtTen.setEditable(false);
+    }
+
+    private void turnOnButtonThem() {
+        btnThem.setEnabled(true);
+    }
+
+    private void turnOffButtonThem() {
+        btnThem.setEnabled(false);
+    }
+
+    private void turnOnButtonSua() {
+        btnSua.setEnabled(true);
+    }
+
+    private void turnOffButtonSua() {
+        btnSua.setEnabled(false);
     }
 }

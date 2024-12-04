@@ -1,5 +1,6 @@
 package com.core.cafe_shop_maven.GUI;
 
+import com.core.cafe_shop_maven.BUS.DangNhapBUS;
 import com.core.cafe_shop_maven.CustomFunctions.XuLyFileExcel;
 import com.core.cafe_shop_maven.CustomFunctions.Dialog;
 import com.core.cafe_shop_maven.CustomFunctions.TransparentPanel;
@@ -10,6 +11,8 @@ import static com.core.cafe_shop_maven.Cafe_shop_maven.changLNF;
 import com.core.cafe_shop_maven.BUS.NhanVienBUS;
 import com.core.cafe_shop_maven.BUS.PhanQuyenBUS;
 import com.core.cafe_shop_maven.BUS.TaiKhoanBUS;
+import com.core.cafe_shop_maven.DAO.NhanVienDAO;
+import com.core.cafe_shop_maven.DAO.PhanQuyenDAO;
 import com.core.cafe_shop_maven.DTO.NhanVien;
 import com.core.cafe_shop_maven.DTO.PhanQuyen;
 
@@ -347,8 +350,13 @@ public class PnQuanLyNhanVienGUI extends JPanel {
         pnCardTabNhanVien.add(pnPhanQuyen, "2");
         this.add(pnCardTabNhanVien);
 
+        if (!checkAdmin()) {
+            lblTabbedQuyen.setVisible(false);
+        }
         loadDataTblNhanVien(null);
         loadDataCmbQuyen();
+        turnOffButtonSuaQuyen();
+        turnOffButtonXoaQuyen();
     }
 
     JComboBox<String> cmbQuyen;
@@ -549,11 +557,15 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             new Dialog("Chưa chọn nhóm quyền để xoá!", Dialog.ERROR_DIALOG);
             return;
         }
+        String tenQuyen = cmbQuyen.getSelectedItem() + "";
+        if (phanQuyenBUS.kiemTraMaQuyenCoTaiKhoanNaoKhong(tenQuyen)) {
+            new Dialog("Có tài khoản mang quyền này!", Dialog.ERROR_DIALOG);
+            return;
+        }
         Dialog dlg = new Dialog("Bạn có chắc chắn muốn xoá?", Dialog.WARNING_DIALOG);
         if (dlg.getAction() == Dialog.CANCEL_OPTION) {
             return;
         }
-        String tenQuyen = cmbQuyen.getSelectedItem() + "";
         boolean flag = phanQuyenBUS.xoaQuyen(tenQuyen);
         if (flag) {
             loadDataCmbQuyen();
@@ -590,16 +602,34 @@ public class PnQuanLyNhanVienGUI extends JPanel {
     private void xuLyHienThiChiTietQuyen() {
         ArrayList<PhanQuyen> dsq = phanQuyenBUS.getListQuyen();
         PhanQuyen phanQuyen = new PhanQuyen();
+        boolean found = false;
         for (PhanQuyen pq : dsq) {
             if (pq.getQuyen().equals(cmbQuyen.getSelectedItem())) {
+                found = true;
                 phanQuyen.setQuyen(pq.getQuyen());
                 phanQuyen.setNhapHang(pq.getNhapHang());
                 phanQuyen.setQlSanPham(pq.getQlSanPham());
                 phanQuyen.setQlNhanVien(pq.getQlNhanVien());
                 phanQuyen.setQlKhachHang(pq.getQlKhachHang());
                 phanQuyen.setThongKe(pq.getThongKe());
+                turnOffButtonThemQuyen();
+                if (checkQuyenAdmin(phanQuyen)) {
+                    turnOffButtonSuaQuyen();
+                    turnOffButtonXoaQuyen();
+                } else if (checkQuyenQuanLy(phanQuyen)) {
+                    turnOffButtonXoaQuyen();
+                    turnOnButtonSuaQuyen();
+                } else {
+                    turnOnButtonXoaQuyen();
+                    turnOnButtonSuaQuyen();
+                }
                 break;
             }
+        }
+        if (found == false) {
+            turnOnButtonThemQuyen();
+            turnOffButtonXoaQuyen();
+            turnOffButtonSuaQuyen();
         }
         ckbNhapHang.setSelected(false);
         ckbQLSanPham.setSelected(false);
@@ -621,6 +651,20 @@ public class PnQuanLyNhanVienGUI extends JPanel {
         if (phanQuyen.getThongKe() == 1) {
             ckbThongKe.setSelected(true);
         }
+    }
+
+    private Boolean checkQuyenAdmin(PhanQuyen phanQuyen) {
+        if (phanQuyen.getQuyen().equals("Quản trị")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkQuyenQuanLy(PhanQuyen phanQuyen) {
+        if (phanQuyen.getQuyen().equals("Quản lý")) {
+            return true;
+        }
+        return false;
     }
 
     private void loadDataCmbQuyen() {
@@ -655,9 +699,36 @@ public class PnQuanLyNhanVienGUI extends JPanel {
 
     private void xuLyKhoaTaiKhoan() {
         TaiKhoanBUS taiKhoanBUS = TaiKhoanBUS.getInstance();
-        taiKhoanBUS.khoaTaiKhoan(txtMaNV.getText());
+        NhanVienDAO nhanVienDAO = NhanVienDAO.getInstance();
+        int maTK = nhanVienDAO.getNhanVien(Integer.parseInt(txtMaNV.getText())).getMaTK();
+        if (checkMyself(maTK)) {
+            new Dialog("Không thể khóa tài khoản bản thân!", Dialog.ERROR_DIALOG);
+            return;
+        }
+        if (checkQuanTri()) {
+            if (checkAdminTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản trị!", Dialog.ERROR_DIALOG);
+                return;
+            }
+            if (checkQuanLyTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản lý!", Dialog.ERROR_DIALOG);
+                return;
+            }
+        } else if (!checkAdmin()) {
+            if (checkAdminTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản trị!", Dialog.ERROR_DIALOG);
+                return;
+            }
+            if (checkQuanLyTheoMa(maTK)) {
+                new Dialog("Không thể khóa tài khoản quản lý!", Dialog.ERROR_DIALOG);
+                return;
+            }
+        }
+        taiKhoanBUS.khoaTaiKhoan(maTK);
         loadDataTblNhanVien(null);
     }
+
+
 
     private void xuLyNhapExcel() {
         Dialog dlg = new Dialog("Dữ liệu cũ sẽ bị xoá, tiếp tục?", Dialog.WARNING_DIALOG);
@@ -749,14 +820,25 @@ public class PnQuanLyNhanVienGUI extends JPanel {
                 txtNgaySinh.setText(sdf.format(d));
             }
             txtSDT.setText(tblNhanVien.getValueAt(row, 4) + "");
-
             txtDiaChi.setText(tblNhanVien.getValueAt(row, 3) + "");
+            if (tblNhanVien.getValueAt(row, 5).equals("Khả dụng")) {
+                turnOffButtonCapTaiKhoan();
+                turnOnButtonKhoaTaiKhoan();
+            } else {
+                turnOnButtonCapTaiKhoan();
+                turnOffButtonKhoaTaiKhoan();
+            }
+            turnOffButtonThemNhanVien();
+            turnOnButtonSuaNhanVien();
+            turnOffTxtNgaySinhNV();
+            turnOffTxtTenNV();
         }
     }
 
     private void loadDataTblNhanVien(ArrayList<NhanVien> dsnv) {
         dtmNhanVien.setRowCount(0);
         if (dsnv == null)
+
             dsnv = nhanVienBUS.getDanhSachNhanVien();
 
         for (NhanVien nv : dsnv) {
@@ -787,7 +869,133 @@ public class PnQuanLyNhanVienGUI extends JPanel {
             }
 
             dtmNhanVien.addRow(vec);
+            turnOnButtonCapTaiKhoan();
+            turnOnButtonThemNhanVien();
+            turnOffButtonSuaNhanVien();
+            turnOffButtonXoaNhanVien();
+            turnOnTxtNgaySinhNV();
+            turnOnTxtTenNV();
         }
+    }
+
+    private Boolean checkAdmin() {
+        int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        if (tenQuyen.equals("Quản trị")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkQuanTri() {
+        int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        if (tenQuyen.equals("Quản lý")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkMyself(int maTKsub) {
+        int maTK = DangNhapBUS.taiKhoanLogin.getMaTK();
+        return maTK == maTKsub;
+    }
+
+    private Boolean checkAdminTheoMa(int maTK) {
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        if (tenQuyen.equals("Quản trị")) {
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean checkQuanLyTheoMa(int maTK) {
+        String tenQuyen = taiKhoanBUS.getQuyenTheoMa(maTK+"");
+        System.out.println(tenQuyen);
+        if (tenQuyen.equals("Quản lý")) {
+            return true;
+        }
+        return false;
+    }
+
+    private void turnOnTxtTenNV() {
+        txtTen.setEditable(true);
+    }
+
+    private void turnOffTxtTenNV() {
+        txtTen.setEditable(false);
+    }
+
+    private void turnOnTxtNgaySinhNV() {
+        txtNgaySinh.setEditable(true);
+    }
+
+    private void turnOffTxtNgaySinhNV() {
+        txtNgaySinh.setEditable(false);
+    }
+
+    private void turnOnButtonCapTaiKhoan() {
+        btnCapTaiKhoan.setEnabled(true);
+    }
+
+    private void turnOffButtonCapTaiKhoan() {
+        btnCapTaiKhoan.setEnabled(false);
+    }
+
+    private void turnOnButtonThemNhanVien() {
+        btnThemNV.setEnabled(true);
+    }
+
+    private void turnOffButtonThemNhanVien() {
+        btnThemNV.setEnabled(false);
+    }
+
+    private void turnOnButtonSuaNhanVien() {
+        btnSuaNV.setEnabled(true);
+    }
+
+    private void turnOffButtonSuaNhanVien() {
+        btnSuaNV.setEnabled(false);
+    }
+
+    private void turnOnButtonXoaNhanVien() {
+        btnXoaNV.setEnabled(true);
+    }
+
+    private void turnOffButtonXoaNhanVien() {
+        btnXoaNV.setEnabled(false);
+    }
+
+    private void turnOnButtonKhoaTaiKhoan() {
+        btnXoaTaiKhoan.setEnabled(true);
+    }
+
+    private void turnOffButtonKhoaTaiKhoan() {
+        btnXoaTaiKhoan.setEnabled(false);
+    }
+
+    private void turnOnButtonXoaQuyen() {
+        btnXoaQuyen.setEnabled(true);
+    }
+
+    private void turnOffButtonXoaQuyen() {
+        btnXoaQuyen.setEnabled(false);
+    }
+
+    private void turnOnButtonSuaQuyen() {
+        btnSuaQuyen.setEnabled(true);
+    }
+
+    private void turnOffButtonSuaQuyen() {
+        btnSuaQuyen.setEnabled(false);
+    }
+
+    private void turnOnButtonThemQuyen() {
+        btnThemQuyen.setEnabled(true);
+    }
+
+    private void turnOffButtonThemQuyen() {
+        btnThemQuyen.setEnabled(false);
     }
 
     TaiKhoanBUS taiKhoanBUS = TaiKhoanBUS.getInstance();

@@ -98,7 +98,9 @@ public class PnQuanLySanPhamGUI extends JPanel {
         txtTen = new JTextField(15);
         cmbLoai = new JComboBox<String>();
         txtsoLuong = new JTextField(15);
+        txtsoLuong.setEditable(false);
         txtdonGia = new JTextField(15);
+        txtdonGia.setEditable(false);
 
         JPanel pnMa = new TransparentPanel();
         lblMa.setFont(font);
@@ -491,6 +493,10 @@ public class PnQuanLySanPhamGUI extends JPanel {
     }
 
     private void xuLyXoaSanPham() {
+        if (!txtsoLuong.getText().equals("0")) {
+            Dialog dlg1 = new Dialog("Không thể xóa!", Dialog.ERROR_DIALOG);
+            return;
+        }
         Dialog dlg = new Dialog("Bạn có chắc chắn muốn xoá?", Dialog.WARNING_DIALOG);
         if (dlg.OK_OPTION == dlg.getAction()) {
             boolean flag = spBUS.xoaSanPham(txtMa.getText());

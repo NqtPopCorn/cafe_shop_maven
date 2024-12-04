@@ -51,7 +51,7 @@ public class NhanVienDAO {
         try {
             String sql = "SELECT * FROM NhanVien WHERE MaNV=?";
             PreparedStatement pre = MyConnect.conn.prepareStatement(sql);
-            pre.setInt(0, maNV);
+            pre.setInt(1, maNV);
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
                 nv = new NhanVien();
@@ -60,7 +60,30 @@ public class NhanVienDAO {
                 nv.setNgaySinh(rs.getString(3));
                 nv.setDiaChi(rs.getString(4));
                 nv.setSdt(rs.getString(5));
-                nv.setMaTK(rs.getInt(6));
+                nv.setMaTK(rs.getInt(7));
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+
+        return nv;
+    }
+
+    public NhanVien getNhanVienTheoMaTK(int maTK) {
+        NhanVien nv = null;
+        try {
+            String sql = "SELECT * FROM NhanVien WHERE MaTK=?";
+            PreparedStatement pre = MyConnect.conn.prepareStatement(sql);
+            pre.setInt(1, maTK);
+            ResultSet rs = pre.executeQuery();
+            while (rs.next()) {
+                nv = new NhanVien();
+                nv.setMaNV(rs.getInt(1));
+                nv.setTen(rs.getString(2));
+                nv.setNgaySinh(rs.getString(3));
+                nv.setDiaChi(rs.getString(4));
+                nv.setSdt(rs.getString(5));
+                nv.setMaTK(rs.getInt(7));
             }
         } catch (SQLException e) {
             return null;

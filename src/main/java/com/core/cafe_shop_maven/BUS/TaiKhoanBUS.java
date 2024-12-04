@@ -1,6 +1,7 @@
 package com.core.cafe_shop_maven.BUS;
 
 import com.core.cafe_shop_maven.DAO.TaiKhoanDAO;
+import com.core.cafe_shop_maven.DTO.NhanVien;
 import com.core.cafe_shop_maven.DTO.TaiKhoan;
 import com.core.cafe_shop_maven.CustomFunctions.Dialog;
 import com.core.cafe_shop_maven.DAO.NhanVienDAO;
@@ -24,7 +25,8 @@ public class TaiKhoanBUS {
 
     public String getTenDangNhapTheoMa(String ma) {
         int maNV = Integer.parseInt(ma);
-        return taiKhoanDAO.getTenDangNhapTheoMa(maNV);
+        int maTK = NhanVienDAO.getInstance().getNhanVien(maNV).getMaTK();
+        return taiKhoanDAO.getTenDangNhapTheoMa(maTK);
     }
 
     public String getQuyenTheoMa(String ma) {
@@ -34,7 +36,8 @@ public class TaiKhoanBUS {
 
     public void datLaiMatKhau(String ma, String tenDangNhap) {
         int maNV = Integer.parseInt(ma);
-        boolean flag = taiKhoanDAO.datLaiMatKhau(maNV, tenDangNhap);
+        int maTK = NhanVienDAO.getInstance().getNhanVien(maNV).getMaTK();
+        boolean flag = taiKhoanDAO.datLaiMatKhau(maTK, tenDangNhap);
         if (flag) {
             new Dialog("Đặt lại thành công! Mật khẩu mới là: " + tenDangNhap, Dialog.SUCCESS_DIALOG);
         } else {
@@ -44,7 +47,8 @@ public class TaiKhoanBUS {
 
     public void datLaiQuyen(String ma, String quyen) {
         int maNV = Integer.parseInt(ma);
-        boolean flag = taiKhoanDAO.datLaiQuyen(maNV, PhanQuyenDAO.getInstance().getMaQuyen(quyen));
+        int maTK = NhanVienDAO.getInstance().getNhanVien(maNV).getMaTK();
+        boolean flag = taiKhoanDAO.datLaiQuyen(maTK, PhanQuyenDAO.getInstance().getMaQuyen(quyen));
         if (flag) {
             new Dialog("Đặt lại thành công!", Dialog.SUCCESS_DIALOG);
         } else {
@@ -85,8 +89,18 @@ public class TaiKhoanBUS {
     }
 
     public void khoaTaiKhoan(String ma) {
-        int maNV = Integer.parseInt(ma);
-        boolean flag = taiKhoanDAO.khoaTaiKhoan(maNV);
+        int maTK = Integer.parseInt(ma);
+        boolean flag = taiKhoanDAO.khoaTaiKhoan(maTK);
+        if (flag) {
+            new Dialog("Khoá tài khoản thành công!", Dialog.SUCCESS_DIALOG);
+        } else {
+            new Dialog("Khoá tài khoản thất bại!", Dialog.ERROR_DIALOG);
+        }
+    }
+
+    public void khoaTaiKhoan(int ma) {
+        int maTK = ma;
+        boolean flag = taiKhoanDAO.khoaTaiKhoan(maTK);
         if (flag) {
             new Dialog("Khoá tài khoản thành công!", Dialog.SUCCESS_DIALOG);
         } else {
@@ -96,8 +110,8 @@ public class TaiKhoanBUS {
 
     public void moKhoaTaiKhoan(String ma) {
         int maNV = Integer.parseInt(ma);
-
-        boolean flag = taiKhoanDAO.moKhoaTaiKhoan(maNV);
+        int maTK = NhanVienDAO.getInstance().getNhanVien(maNV).getMaTK();
+        boolean flag = taiKhoanDAO.moKhoaTaiKhoan(maTK);
         if (flag) {
             new Dialog("Mở khoá tài khoản thành công!", Dialog.SUCCESS_DIALOG);
         } else {
